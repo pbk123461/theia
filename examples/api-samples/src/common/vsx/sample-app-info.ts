@@ -1,5 +1,5 @@
 // *****************************************************************************
-// Copyright (C) 2021 Ericsson and others.
+// Copyright (C) 2023 Ericsson and others.
 //
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,14 +14,9 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import type { OVSXRouterConfig } from '@theia/ovsx-client';
+import { interfaces } from '@theia/core/shared/inversify';
 
-export const VSX_ENVIRONMENT_PATH = '/services/vsx-environment';
-
-export const VSXEnvironment = Symbol('VSXEnvironment');
-export interface VSXEnvironment {
-    getRegistryUri(): Promise<string>;
-    getRegistryApiUri(): Promise<string>;
-    getVscodeApiVersion(): Promise<string>;
-    getOvsxRouterConfig?(): Promise<OVSXRouterConfig | undefined>;
+export const SampleAppInfo = Symbol('SampleAppInfo') as symbol & interfaces.Abstract<SampleAppInfo>;
+export interface SampleAppInfo {
+    getSelfOrigin(): string;
 }

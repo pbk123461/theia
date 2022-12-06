@@ -14,5 +14,10 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-export * from './ovsx-client';
+export { OVSXApiFilter, OVSXApiFilterImpl } from './ovsx-api-filter';
+export * from './ovsx-http-client';
+export { OVSXMockClient } from './ovsx-mock-client';
+export { OVSXRouterClient, OVSXRouterConfig } from './ovsx-router-client';
+export { ExtensionIdMatchesFilterFactory, RequestContainsFilterFactory } from './ovsx-router-filters';
 export * from './ovsx-types';
+

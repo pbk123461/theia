@@ -1,0 +1,25 @@
+{
+  "name": "plugin-a",
+  "version": "1.0.0",
+  "main": "extension.js",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "activationEvents": [
+    "onCommand:plugin-a.hello"
+  ],
+  "devDependencies": {
+    "@types/vscode": "^1.50.0"
+  },
+  "scripts": {
+    "package": "vsce package"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "plugin-a.hello",
+        "title": "Hello from plugin-a"
+      }
+    ]
+  }
+}

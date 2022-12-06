@@ -13,7 +13,8 @@
     "@theia/search-in-workspace": "1.33.0",
     "@theia/toolbar": "1.33.0",
     "@theia/vsx-registry": "1.33.0",
-    "@theia/workspace": "1.33.0"
+    "@theia/workspace": "1.33.0",
+    "@theia/ovsx-client": "1.33.0"
   },
   "theiaExtensions": [
     {
@@ -46,6 +47,7 @@
     "src"
   ],
   "scripts": {
+    "prepare": "yarn --cwd plugins-db/sample-namespace/plugin-a package && yarn --cwd plugins-db/sample-namespace/plugin-b package",
     "lint": "theiaext lint",
     "build": "theiaext build",
     "watch": "theiaext watch",

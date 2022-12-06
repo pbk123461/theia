@@ -15,16 +15,20 @@
 // *****************************************************************************
 
 import { RequestService } from '@theia/core/shared/@theia/request';
-import { OVSXClient } from '@theia/ovsx-client';
+import type { interfaces } from '@theia/core/shared/inversify';
+import { OVSXClient, OVSXHttpClient } from '@theia/ovsx-client';
 import { VSXEnvironment } from './vsx-environment';
 
-export const OVSXClientProvider = Symbol('OVSXClientProvider');
+export const OVSXClientProvider = Symbol('OVSXClientProvider') as symbol & interfaces.Abstract<OVSXClientProvider>;
 export type OVSXClientProvider = () => Promise<OVSXClient>;
 
+export const OVSXClientFactory = Symbol('OVSXClientFactory') as symbol & interfaces.Abstract<OVSXClientFactory>;
+export type OVSXClientFactory = (url: string) => OVSXClient;
+
+/**
+ * @deprecated since 1.32.0
+ */
 export async function createOVSXClient(vsxEnvironment: VSXEnvironment, requestService: RequestService): Promise<OVSXClient> {
-    const [apiVersion, apiUrl] = await Promise.all([
-        vsxEnvironment.getVscodeApiVersion(),
-        vsxEnvironment.getRegistryApiUri()
-    ]);
-    return new OVSXClient({ apiVersion, apiUrl: apiUrl.toString() }, requestService);
+    const apiUrl = await vsxEnvironment.getRegistryApiUri();
+    return new OVSXHttpClient(apiUrl, requestService);
 }
