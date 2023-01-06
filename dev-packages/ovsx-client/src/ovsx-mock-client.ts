@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { OVSXClient, VSXExtensionRaw, VSXQueryOptions, VSXQueryResult, VSXSearchOptions, VSXSearchResult } from './ovsx-types';
+import { ExtensionLike, OVSXClient, VSXExtensionRaw, VSXQueryOptions, VSXQueryResult, VSXSearchOptions, VSXSearchResult } from './ovsx-types';
 
 /**
  * Querying will only find exact matches.
@@ -82,17 +82,18 @@ export class OVSXMockClient implements OVSXClient {
     async search(searchOptions?: VSXSearchOptions): Promise<VSXSearchResult> {
         const query = searchOptions?.query;
         const offset = searchOptions?.offset ?? 0;
-        const size = searchOptions?.size ?? Infinity;
+        const size = searchOptions?.size ?? 18;
+        const end = offset + size;
         return {
-            offset: 0,
+            offset,
             extensions: this.extensions
-                .filter(extension => typeof query === 'string' && (
+                .filter(extension => typeof query !== 'string' || (
                     this.includes(query, this.id(extension)) ||
                     this.includes(query, extension.description) ||
                     this.includes(query, extension.displayName)
                 ))
                 .sort((a, b) => this.sort(a, b, searchOptions))
-                .filter((extension, i) => i >= offset && i < size)
+                .filter((extension, i) => i >= offset && i < end)
                 .map(extension => ({
                     downloadCount: extension.downloadCount,
                     files: extension.files,
@@ -105,7 +106,7 @@ export class OVSXMockClient implements OVSXClient {
         };
     }
 
-    protected id(extension: { name: string, namespace: string }): string {
+    protected id(extension: ExtensionLike): string {
         return `${extension.namespace}.${extension.name}`;
     }
 

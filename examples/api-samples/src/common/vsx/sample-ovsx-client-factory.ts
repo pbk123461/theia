@@ -17,7 +17,7 @@
 import { RequestService } from '@theia/core/shared/@theia/request';
 import { interfaces } from '@theia/core/shared/inversify';
 import { OVSXHttpClient } from '@theia/ovsx-client';
-import { OVSXClientFactory } from '@theia/vsx-registry/lib/common/ovsx-client-provider';
+import { OVSXClientFactory } from '@theia/vsx-registry/lib/common';
 import { SampleAppInfo } from './sample-app-info';
 
 export function rebindOVSXClientFactory(rebind: interfaces.Rebind): void {
@@ -28,7 +28,7 @@ export function rebindOVSXClientFactory(rebind: interfaces.Rebind): void {
             const clientFactory = OVSXHttpClient.createClientFactory(requestService);
             const appInfo = ctx.container.get(SampleAppInfo);
             const selfOrigin = appInfo.getSelfOrigin();
-            return url => clientFactory(url.replace('${self}', selfOrigin));
+            return async url => clientFactory(url.replace('${self}', await selfOrigin));
         })
         .inSingletonScope();
 }

@@ -18,5 +18,5 @@ import { interfaces } from '@theia/core/shared/inversify';
 
 export const SampleAppInfo = Symbol('SampleAppInfo') as symbol & interfaces.Abstract<SampleAppInfo>;
 export interface SampleAppInfo {
-    getSelfOrigin(): string;
+    getSelfOrigin(): Promise<string>;
 }

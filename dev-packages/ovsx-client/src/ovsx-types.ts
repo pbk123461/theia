@@ -14,6 +14,8 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
+import { MaybePromise } from './types';
+
 export interface ExtensionLike {
     name: string
     namespace: string
@@ -252,3 +254,5 @@ export namespace VSXBuiltinNamespaces {
             || namespace === THEIA;
     }
 }
+
+export type OVSXClientFactory = (uri: string) => MaybePromise<OVSXClient>;

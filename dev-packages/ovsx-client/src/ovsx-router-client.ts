@@ -15,7 +15,7 @@
 // *****************************************************************************
 
 import type { FilterFactory, OVSXRequestFilter, OVSXResultFilter } from './ovsx-router-filters';
-import { OVSXClient, VSXQueryOptions, VSXQueryResult, VSXSearchOptions, VSXSearchResult } from './ovsx-types';
+import { OVSXClient, OVSXClientFactory, VSXQueryOptions, VSXQueryResult, VSXSearchOptions, VSXSearchResult } from './ovsx-types';
 import type { MaybePromise } from './types';
 
 export interface OVSXRouterConfig {
@@ -30,15 +30,15 @@ export interface OVSXRouterConfig {
      */
     use: string | string[]
     /**
-     * todo
+     * Filters for the different phases of interfacing with a registry.
      */
     filters?: {
         /**
-         * todo
+         * Filter requests.
          */
         requests?: OVSXRouterRule[]
         /**
-         * todo
+         * Filter results such as returned extensions.
          */
         results?: OVSXRouterRule[]
     }
@@ -66,7 +66,7 @@ export class OVSXRouterClient implements OVSXClient {
 
     static async FromConfig(
         routerConfig: OVSXRouterConfig,
-        getClient: (uri: string) => OVSXClient,
+        getClient: OVSXClientFactory,
         requestFilterFactories: FilterFactory<OVSXRequestFilter>[] = [],
         resultFilterFactories: FilterFactory<OVSXResultFilter>[] = []
     ): Promise<OVSXRouterClient> {
@@ -114,7 +114,7 @@ export class OVSXRouterClient implements OVSXClient {
 
     constructor(
         protected useDefault: string[],
-        protected getClient: (uri: string) => OVSXClient,
+        protected getClient: OVSXClientFactory,
         protected requestFilters: OVSXParsedRule<OVSXRequestFilter>[],
         protected resultFilters: OVSXParsedRule<OVSXResultFilter>[]
     ) { }
@@ -153,20 +153,11 @@ export class OVSXRouterClient implements OVSXClient {
     }
 
     protected async mergedQuery(registries: string[], queryOptions?: VSXQueryOptions): Promise<VSXQueryResult> {
-        return this.mergeQueryResults(await createMapping(registries, registry => this.getClient(registry).query(queryOptions)));
+        return this.mergeQueryResults(await createMapping(registries, async registry => (await this.getClient(registry)).query(queryOptions)));
     }
 
     protected async mergedSearch(registries: string[], searchOptions?: VSXSearchOptions): Promise<VSXSearchResult> {
-        // do not mutate the original value passed as parameter, if any
-        searchOptions &&= { ...searchOptions };
-        if (typeof searchOptions?.size === 'number') {
-            searchOptions.size = Math.min(1, Math.floor(searchOptions.size / registries.length));
-        }
-        const result = await this.mergeSearchResults(await createMapping(registries, registry => this.getClient(registry).search(searchOptions)));
-        if (typeof searchOptions?.size === 'number') {
-            result.extensions = result.extensions.slice(0, searchOptions.size);
-        }
-        return result;
+        return this.mergeSearchResults(await createMapping(registries, async registry => (await this.getClient(registry)).search(searchOptions)));
     }
 
     protected async mergeSearchResults(results: Map<string, VSXSearchResult>): Promise<VSXSearchResult> {
@@ -187,7 +178,7 @@ export class OVSXRouterClient implements OVSXClient {
         ));
         return {
             extensions,
-            offset: 0
+            offset: Math.min(...Array.from(results.values(), result => result.offset))
         };
     }
 
@@ -217,15 +208,15 @@ export class OVSXRouterClient implements OVSXClient {
  * Create a map where the keys are each element from {@link values} and the
  * values are the result of a mapping function applied on the key.
  */
-async function createMapping<T, U>(values: T[], map: (value: T) => MaybePromise<U>, thisArg?: unknown): Promise<Map<T, U>> {
-    return new Map(await Promise.all(values.map(async value => [value, await map.call(thisArg, value)] as [T, U])));
+async function createMapping<T, U>(values: T[], map: (value: T, index: number) => MaybePromise<U>, thisArg?: unknown): Promise<Map<T, U>> {
+    return new Map(await Promise.all(values.map(async (value, index) => [value, await map.call(thisArg, value, index)] as [T, U])));
 }
 
 /**
  * Asynchronously map the {@link values} array using the {@link map}
  * function, then remove all null elements.
  */
-async function mapNonNull<T, U>(values: T[], map: (value: T) => MaybePromise<U>, thisArg?: unknown): Promise<NonNullable<U>[]> {
+async function mapNonNull<T, U>(values: T[], map: (value: T, index: number) => MaybePromise<U>, thisArg?: unknown): Promise<NonNullable<U>[]> {
     return (await Promise.all(values.map(map, thisArg))).filter(nonNullable);
 }
 

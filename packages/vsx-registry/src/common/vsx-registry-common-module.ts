@@ -15,7 +15,7 @@
 // *****************************************************************************
 
 import { ContainerModule } from '@theia/core/shared/inversify';
-import { OVSXClientFactory, OVSXClientProvider } from '../common/ovsx-client-provider';
+import { OVSXClientFactory, OVSXClientProvider } from '../common';
 import { RequestService } from '@theia/core/shared/@theia/request';
 import { ExtensionIdMatchesFilterFactory, OVSXApiFilter, OVSXApiFilterImpl, OVSXClient, OVSXHttpClient, OVSXRouterClient, RequestContainsFilterFactory } from '@theia/ovsx-client';
 import { VSXEnvironment } from './vsx-environment';

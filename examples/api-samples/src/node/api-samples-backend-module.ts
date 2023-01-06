@@ -24,7 +24,9 @@ import { rebindOVSXClientFactory } from '../common/vsx/sample-ovsx-client-factor
 
 export default new ContainerModule((bind, unbind, isBound, rebind) => {
     rebindOVSXClientFactory(rebind);
-    bind(SampleAppInfo).to(SampleBackendAppInfo).inSingletonScope();
+    bind(SampleBackendAppInfo).toSelf().inSingletonScope();
+    bind(SampleAppInfo).toService(SampleBackendAppInfo);
+    bind(BackendApplicationContribution).toService(SampleBackendAppInfo);
     // bind a mock/sample OpenVSX registry:
     bind(BackendApplicationContribution).to(SampleMockOpenVsxServer).inSingletonScope();
     if (process.env.SAMPLE_BACKEND_APPLICATION_SERVER) {

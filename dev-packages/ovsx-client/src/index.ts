@@ -15,9 +15,9 @@
 // *****************************************************************************
 
 export { OVSXApiFilter, OVSXApiFilterImpl } from './ovsx-api-filter';
-export * from './ovsx-http-client';
+export { OVSXHttpClient } from './ovsx-http-client';
 export { OVSXMockClient } from './ovsx-mock-client';
 export { OVSXRouterClient, OVSXRouterConfig } from './ovsx-router-client';
-export { ExtensionIdMatchesFilterFactory, RequestContainsFilterFactory } from './ovsx-router-filters';
+export { ExtensionIdMatchesFilterFactory, FilterFactory, RequestContainsFilterFactory } from './ovsx-router-filters';
 export * from './ovsx-types';
 

@@ -44,7 +44,7 @@ export class SampleMockOpenVsxServer implements BackendApplicationContribution {
     }
 
     async configure(app: express.Application): Promise<void> {
-        const selfOrigin = this.appInfo.getSelfOrigin();
+        const selfOrigin = await this.appInfo.getSelfOrigin();
         const baseUrl = `${selfOrigin}${this.mockServerPath}`;
         const pluginsDb = await this.findMockPlugins(this.pluginsDbPath, baseUrl);
         const staticFileHandlers = new Map(Array.from(pluginsDb.entries(), ([key, value]) => [key, express.static(value.path)]));

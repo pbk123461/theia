@@ -14,16 +14,14 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
+import { MaybePromise } from '@theia/core/lib/common';
 import { RequestService } from '@theia/core/shared/@theia/request';
 import type { interfaces } from '@theia/core/shared/inversify';
 import { OVSXClient, OVSXHttpClient } from '@theia/ovsx-client';
 import { VSXEnvironment } from './vsx-environment';
 
 export const OVSXClientProvider = Symbol('OVSXClientProvider') as symbol & interfaces.Abstract<OVSXClientProvider>;
-export type OVSXClientProvider = () => Promise<OVSXClient>;
-
-export const OVSXClientFactory = Symbol('OVSXClientFactory') as symbol & interfaces.Abstract<OVSXClientFactory>;
-export type OVSXClientFactory = (url: string) => OVSXClient;
+export type OVSXClientProvider = () => MaybePromise<OVSXClient>;
 
 /**
  * @deprecated since 1.32.0

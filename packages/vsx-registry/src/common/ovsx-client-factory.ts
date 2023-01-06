@@ -14,18 +14,8 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { Endpoint } from '@theia/core/lib/browser';
-import { injectable, interfaces } from '@theia/core/shared/inversify';
-import { SampleAppInfo } from '../../common/vsx/sample-app-info';
+import { interfaces } from '@theia/core/shared/inversify';
+import { OVSXClientFactory as OVSXClientFactory0 } from '@theia/ovsx-client';
 
-@injectable()
-export class SampleFrontendAppInfo implements SampleAppInfo {
-
-    async getSelfOrigin(): Promise<string> {
-        return new Endpoint().origin;
-    }
-}
-
-export function bindSampleAppInfo(bind: interfaces.Bind): void {
-    bind(SampleAppInfo).to(SampleFrontendAppInfo).inSingletonScope();
-}
+export const OVSXClientFactory = Symbol('OVSXClientFactory') as symbol & interfaces.Abstract<OVSXClientFactory>;
+export type OVSXClientFactory = OVSXClientFactory0;
