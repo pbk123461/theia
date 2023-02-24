@@ -2108,7 +2108,7 @@ export const PLUGIN_RPC_CONTEXT = {
     THEMING_MAIN: <ProxyIdentifier<ThemingMain>>createProxyIdentifier<ThemingMain>('ThemingMain'),
     COMMENTS_MAIN: <ProxyIdentifier<CommentsMain>>createProxyIdentifier<CommentsMain>('CommentsMain'),
     TABS_MAIN: <ProxyIdentifier<TabsMain>>createProxyIdentifier<TabsMain>('TabsMain'),
-    L10N_MAIN: <ProxyIdentifier<LocalizationMain>>createProxyIdentifier<LocalizationMain>('LocalizationMain'),
+    LOCALIZATION_MAIN: <ProxyIdentifier<LocalizationMain>>createProxyIdentifier<LocalizationMain>('LocalizationMain'),
 };
 
 export const MAIN_RPC_CONTEXT = {
@@ -2218,7 +2218,7 @@ export interface IdentifiableInlineCompletion extends InlineCompletion {
 
 export interface LocalizationExt {
     getMessage(pluginId: string, details: StringDetails): string;
-    getBundle(pluginId: string): { [key: string]: string } | undefined;
+    getBundle(pluginId: string): Record<string, string> | undefined;
     getBundleUri(pluginId: string): theia.Uri | undefined;
     initializeLocalizedMessages(plugin: Plugin, currentLanguage: string): Promise<void>;
 }
