@@ -175,7 +175,7 @@ export abstract class AbstractDialog<T> extends BaseWidget {
         titleContentNode.appendChild(this.titleNode);
 
         this.closeCrossNode = document.createElement('i');
-        this.closeCrossNode.classList.add(...codiconArray('close'));
+        this.closeCrossNode.classList.add(...codiconArray('close', true));
         this.closeCrossNode.classList.add('closeButton');
         titleContentNode.appendChild(this.closeCrossNode);
 

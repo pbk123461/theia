@@ -398,7 +398,7 @@ export class KeybindingWidget extends ReactWidget implements StatefulWidget {
         return <a title='Edit Keybinding' href='#' onClick={e => {
             e.preventDefault();
             this.editKeybinding(item);
-        }}><i className={`${codicon('edit')} kb-action-item`}></i></a>;
+        }}><i className={`${codicon('edit', true)} kb-action-item`}></i></a>;
     }
 
     /**
@@ -411,7 +411,7 @@ export class KeybindingWidget extends ReactWidget implements StatefulWidget {
             ? <a title='Reset Keybinding' href='#' onClick={e => {
                 e.preventDefault();
                 this.resetKeybinding(item);
-            }}><i className={`${codicon('discard')} kb-action-item`}></i></a> : '';
+            }}><i className={`${codicon('discard', true)} kb-action-item`}></i></a> : '';
     }
 
     /**
