@@ -29,7 +29,7 @@ import { WindowService } from '../../browser/window/window-service';
 import { WindowTitleService } from '../../browser/window/window-title-service';
 
 import '../../../src/electron-browser/menu/electron-menu-style.css';
-import { MenuDto } from '../../electron-common/electron-api';
+import { ElectronCurrentWindow, ElectronFrontendApplication, ElectronWindows, MenuDto } from '../../electron-common';
 
 export namespace ElectronCommands {
     export const TOGGLE_DEVELOPER_TOOLS = Command.toDefaultLocalizedCommand({
@@ -82,6 +82,9 @@ export type CustomTitleWidgetFactory = () => Widget | undefined;
 @injectable()
 export class ElectronMenuContribution extends BrowserMenuBarContribution implements FrontendApplicationContribution, CommandContribution, MenuContribution, KeybindingContribution {
 
+    @inject(ElectronFrontendApplication)
+    protected electronFrontendApplication: ElectronFrontendApplication;
+
     @inject(FrontendApplicationStateService)
     protected readonly stateService: FrontendApplicationStateService;
 
@@ -90,6 +93,12 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
 
     @inject(CustomTitleWidgetFactory)
     protected readonly customTitleWidgetFactory: CustomTitleWidgetFactory;
+
+    @inject(ElectronCurrentWindow)
+    protected electronCurrentWindow: ElectronCurrentWindow;
+
+    @inject(ElectronWindows)
+    protected electronWindows: ElectronWindows;
 
     protected titleBarStyleChangeFlag = false;
     protected titleBarStyle?: string;
@@ -129,7 +138,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         // OSX: Recreate the menus when changing windows.
         // OSX only has one menu bar for all windows, so we need to swap
         // between them as the user switches windows.
-        const disposeHandler = window.electronTheiaCore.onWindowEvent('focus', () => {
+        const disposeHandler = this.electronCurrentWindow.onWindowEvent('focus', () => {
             this.setMenu(app);
         });
         window.addEventListener('unload', () => disposeHandler.dispose());
@@ -145,22 +154,20 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
 
     handleTitleBarStyling(app: FrontendApplication): void {
         this.hideTopPanel(app);
-        window.electronTheiaCore.getTitleBarStyleAtStartup().then(style => {
+        this.electronCurrentWindow.getTitleBarStyle().then(style => {
             this.titleBarStyle = style;
             this.setMenu(app);
             this.preferenceService.ready.then(() => {
                 this.preferenceService.set('window.titleBarStyle', this.titleBarStyle, PreferenceScope.User);
             });
         });
-
         this.preferenceService.ready.then(() => {
-            window.electronTheiaCore.setMenuBarVisible(['classic', 'visible'].includes(this.preferenceService.get('window.menuBarVisibility', 'classic')));
+            this.electronWindows.setMenuBarVisible(['classic', 'visible'].includes(this.preferenceService.get('window.menuBarVisibility', 'classic')));
         });
-
         this.preferenceService.onPreferenceChanged(change => {
             if (change.preferenceName === 'window.titleBarStyle') {
                 if (this.titleBarStyleChangeFlag && this.titleBarStyle !== change.newValue) {
-                    window.electronTheiaCore.setTitleBarStyle(change.newValue);
+                    this.electronCurrentWindow.setTitleBarStyle(change.newValue);
                     this.handleRequiredRestart();
                 }
                 this.titleBarStyleChangeFlag = true;
@@ -203,7 +210,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
                 return;
             }
         }
-        window.electronTheiaCore.setMenu(electronMenu);
+        this.electronCurrentWindow.setMenu(electronMenu);
     }
 
     protected createCustomTitleBar(app: FrontendApplication): void {
@@ -215,10 +222,10 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         const controls = document.createElement('div');
         controls.id = 'window-controls';
         controls.append(
-            this.createControlButton('minimize', () => window.electronTheiaCore.minimize()),
-            this.createControlButton('maximize', () => window.electronTheiaCore.maximize()),
-            this.createControlButton('restore', () => window.electronTheiaCore.unMaximize()),
-            this.createControlButton('close', () => window.electronTheiaCore.close())
+            this.createControlButton('minimize', () => this.electronCurrentWindow.minimize()),
+            this.createControlButton('maximize', () => this.electronCurrentWindow.maximize()),
+            this.createControlButton('restore', () => this.electronCurrentWindow.unMaximize()),
+            this.createControlButton('close', () => this.electronCurrentWindow.close())
         );
         app.shell.topPanel.node.append(controls);
         this.handleWindowControls();
@@ -232,11 +239,10 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
     }
 
     protected handleWindowControls(): void {
-        window.electronTheiaCore.onWindowEvent('maximize', () => {
+        this.electronCurrentWindow.onWindowEvent('maximize', () => {
             document.body.classList.add('maximized');
         });
-
-        window.electronTheiaCore.onWindowEvent('unmaximize', () => {
+        this.electronCurrentWindow.onWindowEvent('unmaximize', () => {
             document.body.classList.remove('maximized');
         });
     }
@@ -266,7 +272,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         });
         if (await dialog.open()) {
             this.windowService.setSafeToShutDown();
-            window.electronTheiaCore.restart();
+            this.electronFrontendApplication.restart();
         }
     }
 
@@ -274,7 +280,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
 
         registry.registerCommand(ElectronCommands.TOGGLE_DEVELOPER_TOOLS, {
             execute: () => {
-                window.electronTheiaCore.toggleDevTools();
+                this.electronCurrentWindow.toggleDevTools();
             }
         });
 
@@ -282,12 +288,12 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
             execute: () => this.windowService.reload()
         });
         registry.registerCommand(ElectronCommands.CLOSE_WINDOW, {
-            execute: () => window.electronTheiaCore.close()
+            execute: () => this.electronCurrentWindow.close()
         });
 
         registry.registerCommand(ElectronCommands.ZOOM_IN, {
             execute: async () => {
-                const curentLevel = await window.electronTheiaCore.getZoomLevel();
+                const curentLevel = await this.electronCurrentWindow.getZoomLevel();
                 // When starting at a level that is not a multiple of 0.5, increment by at most 0.5 to reach the next highest multiple of 0.5.
                 let zoomLevel = (Math.floor(curentLevel / ZoomLevel.VARIATION) * ZoomLevel.VARIATION) + ZoomLevel.VARIATION;
                 if (zoomLevel > ZoomLevel.MAX) {
@@ -299,7 +305,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         });
         registry.registerCommand(ElectronCommands.ZOOM_OUT, {
             execute: async () => {
-                const curentLevel = await window.electronTheiaCore.getZoomLevel();
+                const curentLevel = await this.electronCurrentWindow.getZoomLevel();
                 // When starting at a level that is not a multiple of 0.5, decrement by at most 0.5 to reach the next lowest multiple of 0.5.
                 let zoomLevel = (Math.ceil(curentLevel / ZoomLevel.VARIATION) * ZoomLevel.VARIATION) - ZoomLevel.VARIATION;
                 if (zoomLevel < ZoomLevel.MIN) {
@@ -314,8 +320,8 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         });
 
         registry.registerCommand(ElectronCommands.TOGGLE_FULL_SCREEN, {
-            isEnabled: () => window.electronTheiaCore.isFullScreenable(),
-            isVisible: () => window.electronTheiaCore.isFullScreenable(),
+            isEnabled: () => this.electronCurrentWindow.isFullScreenable(),
+            isVisible: () => this.electronCurrentWindow.isFullScreenable(),
             execute: () => this.toggleFullScreen()
         });
     }
@@ -394,15 +400,15 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
     }
 
     protected toggleFullScreen(): void {
-        window.electronTheiaCore.toggleFullScreen();
+        this.electronCurrentWindow.toggleFullScreen();
         const menuBarVisibility = this.preferenceService.get('window.menuBarVisibility', 'classic');
         this.handleFullScreen(menuBarVisibility);
     }
 
     protected handleFullScreen(menuBarVisibility: string): void {
-        const shouldShowTop = !window.electronTheiaCore.isFullScreen() || menuBarVisibility === 'visible';
+        const shouldShowTop = !this.electronCurrentWindow.isFullScreen() || menuBarVisibility === 'visible';
         if (this.titleBarStyle === 'native') {
-            window.electronTheiaCore.setMenuBarVisible(shouldShowTop);
+            this.electronWindows.setMenuBarVisible(shouldShowTop);
         } else if (shouldShowTop) {
             this.shell.topPanel.show();
         } else {

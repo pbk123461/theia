@@ -1,5 +1,5 @@
 // *****************************************************************************
-// Copyright (C) 2019 RedHat and others.
+// Copyright (C) 2023 Ericsson and others.
 //
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,19 +14,6 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { injectable } from 'inversify';
-import { ClipboardService } from '../browser/clipboard-service';
-
-@injectable()
-export class ElectronClipboardService implements ClipboardService {
-
-    readText(): string {
-        return window.electronTheiaCore.readClipboard();
-    }
-
-    writeText(value: string): void {
-        window.electronTheiaCore.writeClipboard(value);
-    }
-
-}
+export { ElectronMainApplication } from './electron-main-application';
+export { ElectronMainApplicationGlobals } from './electron-main-constants';
+export { ElectronSecurityTokenService } from './electron-security-token-service'

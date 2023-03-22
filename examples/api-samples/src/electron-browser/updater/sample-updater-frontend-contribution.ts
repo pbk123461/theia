@@ -29,6 +29,7 @@ import {
 import { ElectronMainMenuFactory } from '@theia/core/lib/electron-browser/menu/electron-main-menu-factory';
 import { FrontendApplicationConfigProvider } from '@theia/core/lib/browser/frontend-application-config-provider';
 import { SampleUpdater, UpdateStatus, SampleUpdaterClient } from '../../common/updater/sample-updater';
+import { ElectronCurrentWindow } from '@theia/core/lib/electron-common';
 
 export namespace SampleUpdaterCommands {
 
@@ -84,12 +85,15 @@ export class ElectronMenuUpdater {
     @inject(ElectronMainMenuFactory)
     protected readonly factory: ElectronMainMenuFactory;
 
+    @inject(ElectronCurrentWindow)
+    protected electronCurrentWindow: ElectronCurrentWindow;
+
     public update(): void {
         this.setMenu();
     }
 
     private setMenu(): void {
-        window.electronTheiaCore.setMenu(this.factory.createElectronMenuBar());
+        this.electronCurrentWindow.setMenu(this.factory.createElectronMenuBar());
     }
 
 }
