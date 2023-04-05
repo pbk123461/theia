@@ -14,7 +14,7 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-/* eslint-disable @typescript-eslint/no-explicit-any, import/no-extraneous-dependencies, no-null/no-null */
+/* eslint-disable @typescript-eslint/no-explicit-any, no-null/no-null */
 
 import { assert } from 'chai';
 import { Container } from 'inversify';
