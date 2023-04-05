@@ -15,7 +15,7 @@
 // *****************************************************************************
 
 import { interfaces } from 'inversify';
-import { proxy, proxyable, TheiaContextBridge, TheiaPreloadApi, TheiaPreloadContext } from '../../electron-common';
+import { proxy, proxyable, TheiaPreloadApi, TheiaPreloadContext } from '../../electron-common';
 
 @proxyable()
 export class TheiaPreloadContextImpl implements TheiaPreloadContext {
@@ -27,10 +27,5 @@ export class TheiaPreloadContextImpl implements TheiaPreloadContext {
     @proxy() getAllPreloadApis(): [string, object][] {
         return this.container.getAll(TheiaPreloadApi)
             .map(serviceIdentifier => [serviceIdentifier, this.container.get(serviceIdentifier)]);
-    }
-
-    @proxy() removeFromMainWorld(): void {
-        this.container.get(TheiaContextBridge)
-            .exposeInMainWorld('exposedTheiaPreloadContext', undefined);
     }
 }

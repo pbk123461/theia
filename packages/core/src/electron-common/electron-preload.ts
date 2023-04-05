@@ -57,7 +57,6 @@ export interface TheiaContextBridge {
 export const TheiaPreloadContext = Symbol('TheiaPreloadContext') as symbol & interfaces.Abstract<TheiaPreloadContext>;
 export interface TheiaPreloadContext {
     getAllPreloadApis(): [serviceIdentifier: string, service: object][]
-    removeFromMainWorld(): void
 }
 
 /**
