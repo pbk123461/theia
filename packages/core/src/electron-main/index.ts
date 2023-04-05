@@ -16,4 +16,4 @@
 
 export { ElectronMainApplication } from './electron-main-application';
 export { ElectronMainApplicationGlobals } from './electron-main-constants';
-export { ElectronSecurityTokenService } from './electron-security-token-service'
+export { ElectronSecurityTokenService } from './electron-security-token-service';
