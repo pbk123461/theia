@@ -87,8 +87,15 @@ describe('FunctionUtils', () => {
         }
 
         function mapVoid<T extends AnyFunction>(fn: T): (...args: Parameters<T>) => void {
-            return (...args) => void fn(...args);
+            return (...args) => {
+                fn(...args);
+            };
         }
+
+        it('mapped functions should work', () => {
+            const mapped = futils.mapfn(returnArgsLength, mapResultToString);
+            assert.strictEqual(mapped(0, '1', 2, {}, []), '5');
+        });
 
         it('identity is preserved when the same arguments are used', () => {
             assert.strictEqual(futils.mapfn(returnArgs, mapResultToString), futils.mapfn(returnArgs, mapResultToString));
