@@ -25,7 +25,7 @@ export class ElectronFrontendApplicationImpl implements ElectronFrontendApplicat
     protected ipcRenderer: TheiaIpcRenderer;
 
     @proxy() handleCanClose(handler: (reason: StopReason) => Promise<boolean>): void {
-        this.ipcRenderer.handle(ipc.canClose, handler);
+        this.ipcRenderer.handle(ipc.canClose, (event, reason) => handler(reason));
     }
 
     @proxy() updateApplicationState(state: FrontendApplicationState): void {

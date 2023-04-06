@@ -33,6 +33,8 @@ const namespaces = new Set<string>();
 export type TheiaIpcMainInvokeEvent = IpcMainInvokeEvent;
 export type TheiaIpcMainEvent = IpcMainEvent;
 export type TheiaIpcRendererEvent = IpcRendererEvent;
+/** Reserved for future uses. */
+export interface TheiaIpcRendererInvokeEvent { }
 
 /**
  * Attach callbacks to this event to receive notifications.
@@ -108,14 +110,14 @@ export interface TheiaIpcRenderer {
      * This functionality is not natively supported by Electron, so this
      * relies on a custom message protocol.
      */
-    handle<T extends AnyFunction>(channel: IpcChannel<T>, listener: T, thisArg?: object): void
+    handle<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcRendererInvokeEvent, T>, thisArg?: object): void
     /**
      * Handle requests coming from the main context only once.
      *
      * This functionality is not natively supported by Electron, so this
      * relies on a custom message protocol.
      */
-    handleOnce<T extends AnyFunction>(channel: IpcChannel<T>, listener: T, thisArg?: object): void
+    handleOnce<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcRendererInvokeEvent, T>, thisArg?: object): void
     on<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcRendererEvent, T>, thisArg?: object): this
     once<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcRendererEvent, T>, thisArg?: object): this
     postMessage<M>(channel: IpcChannel<(message: M) => void>, message: M, transfer?: readonly MessagePort[]): void
