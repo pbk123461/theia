@@ -15,13 +15,13 @@
 // *****************************************************************************
 
 import { ContainerModule } from 'inversify';
-import { FunctionBinder, MessagePortClient, TheiaIpcWindow } from '../electron-common';
+import { FunctionUtils, MessagePortClient, TheiaIpcWindow } from '../electron-common';
 import { TheiaIpcWindowImpl } from './electron-ipc-window-impl';
 import { MessagePortClientImpl } from './electron-message-port-client-impl';
 import { TheiaPreloadApiLoader } from './electron-preload-api-loader';
 
 export default new ContainerModule(bind => {
-    bind(FunctionBinder).toSelf().inSingletonScope();
+    bind(FunctionUtils).toSelf().inSingletonScope();
     bind(TheiaPreloadApiLoader).toSelf().inSingletonScope();
     bind(TheiaIpcWindow).to(TheiaIpcWindowImpl).inSingletonScope();
     bind(MessagePortClient).to(MessagePortClientImpl).inSingletonScope();

@@ -19,7 +19,7 @@
 import { ipcRenderer, IpcRendererEvent } from '@theia/electron/shared/electron';
 import { inject, injectable, postConstruct } from 'inversify';
 import { Disposable, Emitter } from '../../common';
-import { AnyFunction, FunctionBinder, IpcChannel, TheiaIpcRenderer, ELECTRON_INVOKE_IPC as ipc, IpcEvent, TheiaIpcRendererEvent } from '../../electron-common';
+import { AnyFunction, FunctionUtils, IpcChannel, TheiaIpcRenderer, ELECTRON_INVOKE_IPC as ipc, IpcEvent, TheiaIpcRendererEvent } from '../../electron-common';
 
 @injectable()
 export class TheiaIpcRendererImpl implements TheiaIpcRenderer {
@@ -28,8 +28,8 @@ export class TheiaIpcRendererImpl implements TheiaIpcRenderer {
 
     protected handleListeners = new Map<string, { handler: AnyFunction, once: boolean }>();
 
-    @inject(FunctionBinder)
-    protected binder: FunctionBinder;
+    @inject(FunctionUtils)
+    protected futils: FunctionUtils;
 
     @postConstruct()
     protected postConstruct(): void {
@@ -56,23 +56,23 @@ export class TheiaIpcRendererImpl implements TheiaIpcRenderer {
         if (this.handleListeners.has(channel.channel)) {
             console.warn(`replacing the handler for: "${channel.channel}"`);
         }
-        this.handleListeners.set(channel.channel, { handler: this.binder.bindfn(listener, thisArg), once: false });
+        this.handleListeners.set(channel.channel, { handler: this.futils.bindfn(listener, thisArg), once: false });
     }
 
     handleOnce(channel: IpcChannel, listener: AnyFunction, thisArg?: object): void {
         if (this.handleListeners.has(channel.channel)) {
             console.warn(`replacing the handler for: "${channel.channel}"`);
         }
-        this.handleListeners.set(channel.channel, { handler: this.binder.bindfn(listener, thisArg), once: true });
+        this.handleListeners.set(channel.channel, { handler: this.futils.bindfn(listener, thisArg), once: true });
     }
 
     on(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcRenderer.on(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcRenderer.on(channel.channel, this.futils.bindfn(listener, thisArg));
         return this;
     }
 
     once(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcRenderer.once(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcRenderer.once(channel.channel, this.futils.bindfn(listener, thisArg));
         return this;
     }
 
@@ -86,7 +86,7 @@ export class TheiaIpcRendererImpl implements TheiaIpcRenderer {
     }
 
     removeListener(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcRenderer.removeListener(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcRenderer.removeListener(channel.channel, this.futils.bindfn(listener, thisArg));
         return this;
     }
 

@@ -15,7 +15,7 @@
 // *****************************************************************************
 
 import { inject, injectable, postConstruct } from 'inversify';
-import { AnyFunction, FunctionBinder, IpcChannel, TheiaIpcWindow } from '../electron-common';
+import { AnyFunction, FunctionUtils, IpcChannel, TheiaIpcWindow } from '../electron-common';
 
 @injectable()
 export class TheiaIpcWindowImpl implements TheiaIpcWindow {
@@ -23,8 +23,8 @@ export class TheiaIpcWindowImpl implements TheiaIpcWindow {
     protected canary = 'theia-ipc-window-channel-message';
     protected messageListeners = new Map<string, Map<AnyFunction, boolean>>();
 
-    @inject(FunctionBinder)
-    protected binder: FunctionBinder;
+    @inject(FunctionUtils)
+    protected futils: FunctionUtils;
 
     @postConstruct()
     protected postConstruct(): void {
@@ -32,12 +32,12 @@ export class TheiaIpcWindowImpl implements TheiaIpcWindow {
     }
 
     on(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.getOrCreateListeners(channel.channel).set(this.binder.bindfn(listener, thisArg), false);
+        this.getOrCreateListeners(channel.channel).set(this.futils.bindfn(listener, thisArg), false);
         return this;
     }
 
     once(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.getOrCreateListeners(channel.channel).set(this.binder.bindfn(listener, thisArg), true);
+        this.getOrCreateListeners(channel.channel).set(this.futils.bindfn(listener, thisArg), true);
         return this;
     }
 
@@ -51,7 +51,7 @@ export class TheiaIpcWindowImpl implements TheiaIpcWindow {
     }
 
     removeListener(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.messageListeners.get(channel.channel)?.delete(this.binder.bindfn(listener, thisArg));
+        this.messageListeners.get(channel.channel)?.delete(this.futils.bindfn(listener, thisArg));
         return this;
     }
 

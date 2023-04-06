@@ -18,7 +18,7 @@
 
 import { inject, injectable } from 'inversify';
 import { getPrototypeOf, isPromiseLike, isPrototype, Prototype } from '../../common';
-import { FunctionBinder, IpcHandleConverter, ProxyableOptions, ProxyOptions } from '../../electron-common';
+import { FunctionUtils, IpcHandleConverter, ProxyableOptions, ProxyOptions } from '../../electron-common';
 import { IpcReflectKeys } from '../../electron-common/electron-ipc';
 
 @injectable()
@@ -29,8 +29,8 @@ export class ElectronIpcHandleConverterImpl implements IpcHandleConverter {
     /** prototype => properties */
     protected propertiesCache = new WeakMap<Prototype, ReadonlySet<string>>();
 
-    @inject(FunctionBinder)
-    protected binder: FunctionBinder;
+    @inject(FunctionUtils)
+    protected futils: FunctionUtils;
 
     getIpcHandle(value: any): any {
         return this.recursiveIpcHandle(value);
@@ -48,7 +48,7 @@ export class ElectronIpcHandleConverterImpl implements IpcHandleConverter {
      */
     protected recursiveIpcHandle(value: any, thisArg?: object): any {
         if (typeof value === 'function') {
-            return this.cacheMapping(this.binder.bindfn(value, thisArg), boundfn => (...args: any[]) => this.recursiveIpcHandle(boundfn(...args)));
+            return this.cacheMapping(this.futils.bindfn(value, thisArg), boundfn => (...args: any[]) => this.recursiveIpcHandle(boundfn(...args)));
         }
         if (typeof value !== 'object' || value === null) {
             return value;

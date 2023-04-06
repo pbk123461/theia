@@ -33,29 +33,43 @@ export type AnyFunction = (...params: any[]) => any;
  * const instance = new Foo();
  * // Identity is lost even when binding twice to the same reference:
  * instance.bar.bind(instance) !== instance.bar.bind(instance);
- * // Identity is conversed when using FunctionBinder:
- * functionBinder.bindfn(instance.bar, instance) === functionBinder.bindfn(instance.bar, instance);
+ * // Identity is conversed when using FunctionUtils.bindfn:
+ * futils.bindfn(instance.bar, instance) === futils.bindfn(instance.bar, instance);
  */
 @injectable()
-export class FunctionBinder {
+export class FunctionUtils {
 
     /** callbackfn => thisArg => boundfn */
     protected boundfnCache = new WeakMap<AnyFunction, WeakMap<object, AnyFunction>>();
+    /** callbackfn => mapfn => mappedfn */
+    protected mappedfnCache = new WeakMap<AnyFunction, WeakMap<AnyFunction, AnyFunction>>();
 
-    bindfn<T extends AnyFunction>(listener: T, thisArg?: object): T {
+    bindfn<T extends AnyFunction>(callbackfn: T, thisArg?: object): T {
         if (!thisArg) {
-            return listener;
+            return callbackfn;
         }
         // We need to preserve the callback's identity based on the
         // (callbackfn, thisArg) pair.
-        let boundfns = this.boundfnCache.get(listener);
+        let boundfns = this.boundfnCache.get(callbackfn);
         if (!boundfns) {
-            this.boundfnCache.set(listener, boundfns = new WeakMap());
+            this.boundfnCache.set(callbackfn, boundfns = new WeakMap());
         }
         let boundfn = boundfns.get(thisArg);
         if (!boundfn) {
-            boundfns.set(thisArg, boundfn = listener.bind(thisArg));
+            boundfns.set(thisArg, boundfn = callbackfn.bind(thisArg));
         }
         return boundfn as T;
+    }
+
+    mapfn<T extends AnyFunction, U extends AnyFunction>(callbackfn: T, mapfn: (callbackfn: T) => U): U {
+        let mappedfns = this.mappedfnCache.get(callbackfn);
+        if (!mappedfns) {
+            this.mappedfnCache.set(callbackfn, mappedfns = new WeakMap());
+        }
+        let mappedfn = mappedfns.get(mapfn);
+        if (!mappedfn) {
+            mappedfns.set(mapfn, mappedfn = mapfn(callbackfn));
+        }
+        return mappedfn as U;
     }
 }

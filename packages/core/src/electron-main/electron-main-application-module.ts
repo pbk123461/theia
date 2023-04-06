@@ -18,7 +18,7 @@ import { ContainerModule } from 'inversify';
 import { v4 } from 'uuid';
 import { bindContributionProvider } from '../common/contribution-provider';
 import { JsonRpcConnectionHandler } from '../common/messaging/proxy-factory';
-import { FunctionBinder, MessagePortServer, TheiaIpcMain } from '../electron-common';
+import { FunctionUtils, MessagePortServer, TheiaIpcMain } from '../electron-common';
 import { ElectronMainWindowService, electronMainWindowServicePath } from '../electron-common/electron-main-window-service';
 import { ElectronSecurityToken } from '../electron-common/electron-token';
 import { ElectronConnectionHandler } from '../electron-common/messaging/electron-connection-handler';
@@ -43,7 +43,7 @@ const electronSecurityToken: ElectronSecurityToken = { value: v4() };
 (global as any)[ElectronSecurityToken] = electronSecurityToken;
 
 export default new ContainerModule(bind => {
-    bind(FunctionBinder).toSelf().inSingletonScope();
+    bind(FunctionUtils).toSelf().inSingletonScope();
     bind(TheiaIpcMain).to(TheiaIpcMainImpl).inSingletonScope();
     bind(ElectronMainApplication).toSelf().inSingletonScope();
     bind(ElectronMessagingContribution).toSelf().inSingletonScope();

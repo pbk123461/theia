@@ -60,13 +60,25 @@ export interface TheiaIpcMain {
     /**
      * Invoke a handler and get a response from a given webContents.
      *
-     * This functionality is not natively supported by Electron, so this
-     * relies on a custom message protocol.
+     * This functionality is not natively supported by Electron, so this relies
+     * on a custom message protocol.
      */
     invoke<T extends AnyFunction>(webContents: WebContents, channel: IpcChannel<T>, ...params: Parameters<T>): IpcInvokeReturn<T>
     handle<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcMainInvokeEvent, T>, thisArg?: object): void
     handleOnce<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcMainInvokeEvent, T>, thisArg?: object): void
+    /**
+     * Handle a call to `send` or `sendSync` from a window.
+     *
+     * Note that you DON'T need to set `event.returnValue`, just returning the
+     * value in your handler is enough.
+     */
     on<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcMainEvent, T>, thisArg?: object): this
+    /**
+     * Only handle once a call to `send` or `sendSync`from a window.
+     *
+     * Note that you DON'T need to set `event.returnValue`, just returning the
+     * value in your handler is enough.
+     */
     once<T extends AnyFunction>(channel: IpcChannel<T>, listener: IpcListener<TheiaIpcMainEvent, T>, thisArg?: object): this
     postMessageTo<M>(webContents: WebContents, channel: IpcChannel<(message: M) => void>, message: M, transfer?: readonly MessagePortMain[]): void
     removeAllListeners(channel: IpcChannel): this

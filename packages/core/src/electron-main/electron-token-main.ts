@@ -34,7 +34,7 @@ export class ElectronSecurityTokenServiceMain implements ElectronMainApplication
     }
 
     protected onGetSecurityToken(event: TheiaIpcMainEvent): string {
-        return event.returnValue = this.token.value;
+        return this.token.value;
     }
 
     protected async handleAttachSecurityToken(event: TheiaIpcMainInvokeEvent, endpoint: string): Promise<void> {

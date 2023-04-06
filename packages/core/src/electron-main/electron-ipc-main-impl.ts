@@ -20,7 +20,7 @@ import { ipcMain, IpcMainEvent, WebContents, webContents as electronWebContents,
 import { inject, injectable, postConstruct } from 'inversify';
 import { Disposable, Emitter } from '../common';
 import { Deferred } from '../common/promise-util';
-import { AnyFunction, ELECTRON_INVOKE_IPC as ipc, FunctionBinder, IpcChannel, IpcEvent, TheiaIpcMain, TheiaIpcMainEvent } from '../electron-common';
+import { AnyFunction, ELECTRON_INVOKE_IPC as ipc, FunctionUtils, IpcChannel, IpcEvent, TheiaIpcMain, TheiaIpcMainEvent } from '../electron-common';
 
 @injectable()
 export class TheiaIpcMainImpl implements TheiaIpcMain {
@@ -30,8 +30,8 @@ export class TheiaIpcMainImpl implements TheiaIpcMain {
     protected invokeId = 0;
     protected pendingInvokeResults = new Map<string, Deferred<unknown>>();
 
-    @inject(FunctionBinder)
-    protected binder: FunctionBinder;
+    @inject(FunctionUtils)
+    protected futils: FunctionUtils;
 
     @postConstruct()
     protected postConstruct(): void {
@@ -59,20 +59,24 @@ export class TheiaIpcMainImpl implements TheiaIpcMain {
     }
 
     handle(channel: IpcChannel, listener: AnyFunction, thisArg?: object): void {
-        this.electronIpcMain.handle(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcMain.handle(channel.channel, this.futils.bindfn(listener, thisArg));
     }
 
     handleOnce(channel: IpcChannel, listener: AnyFunction, thisArg?: object): void {
-        this.electronIpcMain.handleOnce(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcMain.handleOnce(channel.channel, this.futils.bindfn(listener, thisArg));
     }
 
     on(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcMain.on(channel.channel, this.binder.bindfn(listener, thisArg));
+        const boundListener = this.futils.bindfn(listener, thisArg);
+        const boundMap = this.futils.bindfn(this.mapSyncHandler, this);
+        this.electronIpcMain.on(channel.channel, this.futils.mapfn(boundListener, boundMap));
         return this;
     }
 
     once(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcMain.once(channel.channel, this.binder.bindfn(listener, thisArg));
+        const boundListener = this.futils.bindfn(listener, thisArg);
+        const boundMap = this.futils.bindfn(this.mapSyncHandler, this);
+        this.electronIpcMain.once(channel.channel, this.futils.mapfn(boundListener, boundMap));
         return this;
     }
 
@@ -90,7 +94,7 @@ export class TheiaIpcMainImpl implements TheiaIpcMain {
     }
 
     removeListener(channel: IpcChannel, listener: AnyFunction, thisArg?: object): this {
-        this.electronIpcMain.removeListener(channel.channel, this.binder.bindfn(listener, thisArg));
+        this.electronIpcMain.removeListener(channel.channel, this.futils.bindfn(listener, thisArg));
         return this;
     }
 
@@ -117,5 +121,17 @@ export class TheiaIpcMainImpl implements TheiaIpcMain {
         } else {
             console.warn(`no pending request for: "${key}"`);
         }
+    }
+
+    /**
+     * Use the return value from `callbackfn` to set `event.returnValue`.
+     */
+    protected mapSyncHandler(callbackfn: (event: TheiaIpcMainEvent, ...args: unknown[]) => unknown): (event: TheiaIpcMainEvent, ...args: unknown[]) => void {
+        return (event, ...args) => {
+            const result = callbackfn(event, ...args);
+            if (result !== undefined) {
+                event.returnValue = result;
+            }
+        };
     }
 }

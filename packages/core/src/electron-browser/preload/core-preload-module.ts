@@ -31,7 +31,7 @@ import { ElectronSecurityTokenServiceImpl } from './electron-token-impl';
 import { ElectronWindowsImpl } from './electron-windows-impl';
 
 export default new ContainerModule(bind => {
-    bind(common.FunctionBinder).toSelf().inSingletonScope();
+    bind(common.FunctionUtils).toSelf().inSingletonScope();
     bind(common.TheiaPreloadContext).toDynamicValue(ctx => new TheiaPreloadContextImpl(ctx.container)).inSingletonScope();
     bind(common.TheiaIpcWindow).to(TheiaIpcWindowImpl).inSingletonScope();
     bind(common.TheiaIpcRenderer).to(TheiaIpcRendererImpl).inSingletonScope();

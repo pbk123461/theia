@@ -54,7 +54,7 @@ export class ElectronCurrentWindowMain implements ElectronMainApplicationContrib
     }
 
     protected onIsMaximized(event: TheiaIpcMainEvent): boolean {
-        return event.returnValue = BrowserWindow.fromWebContents(event.sender)!.isMaximized();
+        return BrowserWindow.fromWebContents(event.sender)!.isMaximized();
     }
 
     protected onSetMenu(event: TheiaIpcMainEvent, menuId: MenuId, menu?: MenuDto[]): void {
@@ -123,11 +123,11 @@ export class ElectronCurrentWindowMain implements ElectronMainApplicationContrib
     }
 
     protected onIsFullScreenable(event: TheiaIpcMainEvent): boolean {
-        return event.returnValue = BrowserWindow.fromWebContents(event.sender)!.isFullScreenable();
+        return BrowserWindow.fromWebContents(event.sender)!.isFullScreenable();
     }
 
     protected onIsFullScreen(event: TheiaIpcMainEvent): boolean {
-        return event.returnValue = BrowserWindow.fromWebContents(event.sender)!.isFullScreen();
+        return BrowserWindow.fromWebContents(event.sender)!.isFullScreen();
     }
 
     protected onToggleFullScreen(event: TheiaIpcMainEvent): void {

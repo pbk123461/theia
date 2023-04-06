@@ -28,4 +28,4 @@ export { bindPreloadApi, ElectronPreloadContribution, isPreloadServiceIdentifier
 export { ElectronShell, ELECTRON_SHELL_IPC } from './electron-shell';
 export { ElectronSecurityToken, ElectronSecurityTokenService, ELECTRON_SECURITY_TOKEN_IPC } from './electron-token';
 export { ElectronWindows, ELECTRON_WINDOWS_IPC } from './electron-windows';
-export { AnyFunction, FunctionBinder } from './function-binder';
+export { AnyFunction, FunctionUtils } from './function-utils';

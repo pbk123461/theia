@@ -18,14 +18,14 @@
 
 import { assert } from 'chai';
 import { Container } from 'inversify';
-import { FunctionBinder, IpcHandleConverter, proxy, proxyable } from '../../electron-common';
+import { FunctionUtils, IpcHandleConverter, proxy, proxyable } from '../../electron-common';
 import { ElectronIpcHandleConverterImpl } from './electron-ipc-handle-converter-impl';
 
 describe('IpcHandleConverterImpl', () => {
 
     function createIpcHandleConverter(): IpcHandleConverter {
         const container = new Container();
-        container.bind(FunctionBinder).toSelf().inSingletonScope();
+        container.bind(FunctionUtils).toSelf().inSingletonScope();
         container.bind(IpcHandleConverter).to(ElectronIpcHandleConverterImpl).inSingletonScope();
         return container.get(IpcHandleConverter);
     }

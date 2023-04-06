@@ -17,7 +17,7 @@
 import { inject, injectable } from 'inversify';
 import { ElectronMainApplicationContribution } from './electron-main-application';
 import {
-    ConnectionRequest, ELECTRON_MESSAGE_PORT_IPC as ipc, FunctionBinder, MessagePortHandler, MessagePortHandlerId, MessagePortServer, TheiaIpcMain, TheiaIpcMainEvent
+    ConnectionRequest, ELECTRON_MESSAGE_PORT_IPC as ipc, FunctionUtils, MessagePortHandler, MessagePortHandlerId, MessagePortServer, TheiaIpcMain, TheiaIpcMainEvent
 } from '../electron-common';
 
 @injectable()
@@ -28,15 +28,15 @@ export class ElectronMessagePortServerMain implements ElectronMainApplicationCon
     @inject(TheiaIpcMain)
     protected ipcMain: TheiaIpcMain;
 
-    @inject(FunctionBinder)
-    protected binder: FunctionBinder;
+    @inject(FunctionUtils)
+    protected futils: FunctionUtils;
 
     onStart(): void {
         this.ipcMain.on(ipc.connectionRequest, this.onConnectionRequest, this);
     }
 
     handle(handlerId: string, handler: MessagePortHandler, thisArg?: object): void {
-        this.messagePortHandlers.set(handlerId, this.binder.bindfn(handler, thisArg));
+        this.messagePortHandlers.set(handlerId, this.futils.bindfn(handler, thisArg));
     }
 
     removeHandler(handlerId: MessagePortHandlerId): void {
