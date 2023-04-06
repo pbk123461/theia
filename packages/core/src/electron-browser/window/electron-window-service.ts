@@ -19,7 +19,7 @@ import { NewWindowOptions } from '../../common/window';
 import { DefaultWindowService } from '../../browser/window/default-window-service';
 import { ElectronMainWindowService } from '../../electron-common/electron-main-window-service';
 import { ElectronWindowPreferences } from './electron-window-preferences';
-import { ElectronCurrentWindow, ElectronFrontendApplication } from '../../electron-common';
+import { ElectronFrontendApplication, ElectronWindows } from '../../electron-common';
 
 @injectable()
 export class ElectronWindowService extends DefaultWindowService {
@@ -40,8 +40,8 @@ export class ElectronWindowService extends DefaultWindowService {
     @inject(ElectronWindowPreferences)
     protected readonly electronWindowPreferences: ElectronWindowPreferences;
 
-    @inject(ElectronCurrentWindow)
-    protected electronCurrentWindow: ElectronCurrentWindow;
+    @inject(ElectronWindows)
+    protected electronWindows: ElectronWindows;
 
     @inject(ElectronFrontendApplication)
     protected electronFrontendApplication: ElectronFrontendApplication;
@@ -77,12 +77,12 @@ export class ElectronWindowService extends DefaultWindowService {
      */
     protected async updateWindowZoomLevel(): Promise<void> {
         const preferredZoomLevel = this.electronWindowPreferences['window.zoomLevel'];
-        if (await this.electronCurrentWindow.getZoomLevel() !== preferredZoomLevel) {
-            this.electronCurrentWindow.setZoomLevel(preferredZoomLevel);
+        if (await this.electronWindows.currentWindow.getZoomLevel() !== preferredZoomLevel) {
+            this.electronWindows.currentWindow.setZoomLevel(preferredZoomLevel);
         }
     }
 
     override reload(): void {
-        this.electronCurrentWindow.reload();
+        this.electronWindows.currentWindow.reload();
     }
 }

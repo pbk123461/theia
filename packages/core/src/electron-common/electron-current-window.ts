@@ -15,8 +15,8 @@
 // *****************************************************************************
 
 import { MenuDto } from './electron-menu';
-import { preloadServiceIdentifier } from './electron-preload';
 import { createIpcNamespace } from './electron-ipc';
+import { preloadServiceIdentifier } from './electron-preload';
 import { Disposable } from '../common';
 
 export type WindowEvent = 'maximize' | 'unmaximize' | 'focus';

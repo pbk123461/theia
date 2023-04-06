@@ -39,11 +39,11 @@ export default new ContainerModule(bind => {
     bind(common.IpcHandleConverter).to(ElectronIpcHandleConverterImpl).inSingletonScope();
     bind(common.ElectronPreloadContribution).to(ElectronMessagePortBroker).inSingletonScope();
     const { bindPreloadApi } = common;
-    bindPreloadApi(bind, common.ElectronFrontendApplication).to(ElectronFrontendApplicationImpl).inSingletonScope();
     bindPreloadApi(bind, common.ElectronClipboardService).to(ElectronClipboardServiceImpl).inSingletonScope();
     bindPreloadApi(bind, common.ElectronCurrentWindow).to(ElectronCurrentWindowImpl).inSingletonScope();
-    bindPreloadApi(bind, common.ElectronSecurityTokenService).to(ElectronSecurityTokenServiceImpl).inSingletonScope();
-    bindPreloadApi(bind, common.ElectronWindows).to(ElectronWindowsImpl).inSingletonScope();
-    bindPreloadApi(bind, common.ElectronShell).to(ElectronShellImpl).inSingletonScope();
+    bindPreloadApi(bind, common.ElectronFrontendApplication).to(ElectronFrontendApplicationImpl).inSingletonScope();
     bindPreloadApi(bind, common.ElectronKeyboardLayout).to(ElectronKeyboardLayoutImpl).inSingletonScope();
+    bindPreloadApi(bind, common.ElectronSecurityTokenService).to(ElectronSecurityTokenServiceImpl).inSingletonScope();
+    bindPreloadApi(bind, common.ElectronShell).to(ElectronShellImpl).inSingletonScope();
+    bindPreloadApi(bind, common.ElectronWindows).to(ElectronWindowsImpl).inSingletonScope();
 });

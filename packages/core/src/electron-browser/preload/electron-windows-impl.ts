@@ -15,10 +15,13 @@
 // *****************************************************************************
 
 import { inject, injectable } from 'inversify';
-import { ElectronWindows, ELECTRON_WINDOWS_IPC as ipc, proxy, proxyable, TheiaIpcRenderer } from '../../electron-common';
+import { ElectronCurrentWindow, ElectronWindows, ELECTRON_WINDOWS_IPC as ipc, proxy, proxyable, TheiaIpcRenderer } from '../../electron-common';
 
 @injectable() @proxyable()
 export class ElectronWindowsImpl implements ElectronWindows {
+
+    @proxy() @inject(ElectronCurrentWindow)
+    currentWindow: ElectronCurrentWindow;
 
     @inject(TheiaIpcRenderer)
     protected ipcRenderer: TheiaIpcRenderer;

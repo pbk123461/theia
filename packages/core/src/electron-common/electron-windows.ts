@@ -16,6 +16,7 @@
 
 import { createIpcNamespace } from './electron-ipc';
 import { preloadServiceIdentifier } from './electron-preload';
+import { ElectronCurrentWindow } from './electron-current-window';
 
 export const ELECTRON_WINDOWS_IPC = createIpcNamespace('theia-electron-windows', channel => ({
     setMenuBarVisible: channel<(visible: boolean, windowName?: string) => void>(),
@@ -24,6 +25,7 @@ export const ELECTRON_WINDOWS_IPC = createIpcNamespace('theia-electron-windows',
 
 export const ElectronWindows = preloadServiceIdentifier<ElectronWindows>('ElectronWindows');
 export interface ElectronWindows {
+    currentWindow: ElectronCurrentWindow
     setMenuBarVisible(visible: boolean, windowName?: string): void
     focusWindow(windowName: string): void
 }
