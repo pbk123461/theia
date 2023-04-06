@@ -15,13 +15,14 @@
 // *****************************************************************************
 
 import { MenuDto } from './electron-menu';
-import { createIpcNamespace } from './electron-ipc';
+import { createIpcNamespace, IpcEvent } from './electron-ipc';
 import { preloadServiceIdentifier } from './electron-preload';
-import { Disposable } from '../common';
-
-export type WindowEvent = 'maximize' | 'unmaximize' | 'focus';
 
 export const ELECTRON_CURRENT_WINDOW_IPC = createIpcNamespace('theia-electron-current-window', channel => ({
+    onFocus: channel<() => void>(),
+    onMaximize: channel<() => void>(),
+    onUnmaximize: channel<() => void>(),
+    isMaximized: channel<() => boolean>(),
     minimize: channel<() => void>(),
     maximize: channel<() => void>(),
     unmaximize: channel<() => void>(),
@@ -38,7 +39,6 @@ export const ELECTRON_CURRENT_WINDOW_IPC = createIpcNamespace('theia-electron-cu
     openPopup: channel<(menuId: number, menu: MenuDto[], x: number, y: number) => Promise<number>>(),
     closePopup: channel<(handle: number) => void>(),
     onPopupClosed: channel<(menuId: number) => void>(),
-    onWindowEvent: channel<(eventName: WindowEvent) => void>(),
     reload: channel<() => void>(),
     getTitleBarStyle: channel<() => Promise<string>>(),
     setTitleBarStyle: channel<(style: string) => Promise<void>>()
@@ -46,6 +46,10 @@ export const ELECTRON_CURRENT_WINDOW_IPC = createIpcNamespace('theia-electron-cu
 
 export const ElectronCurrentWindow = preloadServiceIdentifier<ElectronCurrentWindow>('ElectronCurrentWindow');
 export interface ElectronCurrentWindow {
+    onFocus: IpcEvent<void>
+    onMaximize: IpcEvent<void>
+    onUnmaximize: IpcEvent<void>
+    isMaximized(): boolean
     minimize(): void
     maximize(): void
     unMaximize(): void
@@ -59,7 +63,6 @@ export interface ElectronCurrentWindow {
     toggleFullScreen(): void
     popup(menu: MenuDto[], x: number, y: number, onClosed: () => void): Promise<number>
     closePopup(handle: number): void
-    onWindowEvent(eventName: WindowEvent, handler: () => void): Disposable
     reload(): void
     getTitleBarStyle(): Promise<string>
     setTitleBarStyle(style: string): Promise<void>

@@ -34,6 +34,7 @@ export class ElectronCurrentWindowMain implements ElectronMainApplicationContrib
 
     onStart(application: ElectronMainApplication): void {
         this.application = application;
+        this.ipcMain.on(ipc.isMaximized, this.onIsMaximized, this);
         this.ipcMain.on(ipc.setMenu, this.onSetMenu, this);
         this.ipcMain.handle(ipc.openPopup, this.onOpenPopup, this);
         this.ipcMain.handle(ipc.closePopup, this.handleClosePopup, this);
@@ -50,6 +51,10 @@ export class ElectronCurrentWindowMain implements ElectronMainApplicationContrib
         this.ipcMain.on(ipc.reload, this.onReload, this);
         this.ipcMain.handle(ipc.getTitleBarStyle, this.handleGetTitleBarStyle, this);
         this.ipcMain.handle(ipc.setTitleBarStyle, this.handleSetTitleBarStyle, this);
+    }
+
+    protected onIsMaximized(event: TheiaIpcMainEvent): boolean {
+        return event.returnValue = BrowserWindow.fromWebContents(event.sender)!.isMaximized();
     }
 
     protected onSetMenu(event: TheiaIpcMainEvent, menuId: MenuId, menu?: MenuDto[]): void {

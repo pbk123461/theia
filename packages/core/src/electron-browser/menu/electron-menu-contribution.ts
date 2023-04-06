@@ -135,7 +135,7 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
         // OSX: Recreate the menus when changing windows.
         // OSX only has one menu bar for all windows, so we need to swap
         // between them as the user switches windows.
-        const disposeHandler = this.electronWindows.currentWindow.onWindowEvent('focus', () => {
+        const disposeHandler = this.electronWindows.currentWindow.onFocus(() => {
             this.setMenu(app);
         });
         window.addEventListener('unload', () => disposeHandler.dispose());
@@ -236,10 +236,13 @@ export class ElectronMenuContribution extends BrowserMenuBarContribution impleme
     }
 
     protected handleWindowControls(): void {
-        this.electronWindows.currentWindow.onWindowEvent('maximize', () => {
+        if (this.electronWindows.currentWindow.isMaximized()) {
+            document.body.classList.add('maximized');
+        }
+        this.electronWindows.currentWindow.onMaximize(() => {
             document.body.classList.add('maximized');
         });
-        this.electronWindows.currentWindow.onWindowEvent('unmaximize', () => {
+        this.electronWindows.currentWindow.onUnmaximize(() => {
             document.body.classList.remove('maximized');
         });
     }

@@ -14,10 +14,9 @@
 // SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 // *****************************************************************************
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, postConstruct } from 'inversify';
 import { InternalMenuDto, MenuDto } from '../../electron-common/electron-menu';
-import { ELECTRON_CURRENT_WINDOW_IPC as ipc, ElectronCurrentWindow, TheiaIpcRenderer, proxy, proxyable } from '../../electron-common';
-import { Disposable } from '../../common';
+import { ELECTRON_CURRENT_WINDOW_IPC as ipc, ElectronCurrentWindow, TheiaIpcRenderer, proxy, proxyable, IpcEvent } from '../../electron-common';
 
 type MenuId = number;
 type HandlerId = number;
@@ -27,13 +26,27 @@ const MAIN_MENU_ID = 0;
 @injectable() @proxyable()
 export class ElectronCurrentWindowImpl implements ElectronCurrentWindow {
 
-    protected windowEventHandlers = new Map<string, Set<() => void>>();
+    @proxy() onFocus: IpcEvent<void>;
+    @proxy() onMaximize: IpcEvent<void>;
+    @proxy() onUnmaximize: IpcEvent<void>;
+
     protected commandHandlers = new Map<MenuId, Map<HandlerId, () => void>>();
     protected menuId = MAIN_MENU_ID + 1;
     protected handlerId = 0;
 
     @inject(TheiaIpcRenderer)
     protected ipcRenderer: TheiaIpcRenderer;
+
+    @postConstruct()
+    protected postConstruct(): void {
+        this.onFocus = this.ipcRenderer.createEvent(ipc.onFocus);
+        this.onMaximize = this.ipcRenderer.createEvent(ipc.onMaximize);
+        this.onUnmaximize = this.ipcRenderer.createEvent(ipc.onUnmaximize);
+    }
+
+    @proxy() isMaximized(): boolean {
+        return this.ipcRenderer.sendSync(ipc.isMaximized);
+    }
 
     @proxy() minimize(): void {
         this.ipcRenderer.send(ipc.minimize);
@@ -103,19 +116,6 @@ export class ElectronCurrentWindowImpl implements ElectronCurrentWindow {
         this.ipcRenderer.send(ipc.closePopup, handle);
     }
 
-    @proxy() onWindowEvent(eventName: string, handler: (...args: unknown[]) => void): Disposable {
-        this.getWindowEventHandlers(eventName).add(handler);
-        return {
-            dispose: () => {
-                const handlers = this.getWindowEventHandlers(eventName);
-                handlers.delete(handler);
-                if (handlers.size === 0) {
-                    this.windowEventHandlers.delete(eventName);
-                }
-            }
-        };
-    }
-
     @proxy() reload(): void {
         this.ipcRenderer.send(ipc.reload);
     }
@@ -126,14 +126,6 @@ export class ElectronCurrentWindowImpl implements ElectronCurrentWindow {
 
     @proxy() async setTitleBarStyle(style: string): Promise<void> {
         await this.ipcRenderer.invoke(ipc.setTitleBarStyle, style);
-    }
-
-    protected getWindowEventHandlers(eventName: string): Set<() => void> {
-        let handlers = this.windowEventHandlers.get(eventName);
-        if (!handlers) {
-            this.windowEventHandlers.set(eventName, handlers = new Set());
-        }
-        return handlers;
     }
 
     protected convertMenu(menu: MenuDto[] | undefined, handlerMap: Map<HandlerId, () => void>): InternalMenuDto[] | undefined {

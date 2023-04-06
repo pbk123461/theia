@@ -273,9 +273,9 @@ export class ElectronMainApplication {
         const id = electronWindow.window.webContents.id;
         this.windows.set(id, electronWindow);
         electronWindow.onDidClose(() => this.windows.delete(id));
-        electronWindow.window.on('maximize', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onWindowEvent, 'maximize'));
-        electronWindow.window.on('unmaximize', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onWindowEvent, 'unmaximize'));
-        electronWindow.window.on('focus', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onWindowEvent, 'focus'));
+        electronWindow.window.on('maximize', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onMaximize));
+        electronWindow.window.on('unmaximize', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onUnmaximize));
+        electronWindow.window.on('focus', () => this.ipcMain.sendTo(electronWindow.window.webContents, ELECTRON_CURRENT_WINDOW_IPC.onFocus));
         this.attachSaveWindowState(electronWindow.window);
         this.configureNativeSecondaryWindowCreation(electronWindow.window);
         return electronWindow.window;
