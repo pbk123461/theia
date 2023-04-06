@@ -146,7 +146,7 @@ export class ApplicationPackageManager {
         // The backend must be a process group leader on UNIX in order to kill the tree later.
         // See https://nodejs.org/api/child_process.html#child_process_options_detached
         options.detached = process.platform !== 'win32';
-        return this.__process.fork(this.pck.backend('main.js'), mainArgs, options);
+        return this.__process.fork(this.pck.path('bundled/main.js'), mainArgs, options);
     }
 
     /**

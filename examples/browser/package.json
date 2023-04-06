@@ -62,6 +62,7 @@
     "clean": "theia clean",
     "build": "yarn -s compile && yarn -s bundle",
     "bundle": "theia build --mode development",
+    "bundle:node": "webpack --config webpack.node.config.js",
     "compile": "tsc -b",
     "coverage": "yarn -s test --test-coverage && yarn -s coverage:report",
     "coverage:clean": "rimraf .nyc_output && rimraf coverage",
