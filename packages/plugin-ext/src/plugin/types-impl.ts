@@ -1995,6 +1995,11 @@ export class DocumentSymbol {
     }
 }
 
+export enum CommentThreadState {
+    Unresolved = 0,
+    Resolved = 1
+}
+
 export enum CommentThreadCollapsibleState {
     Collapsed = 0,
     Expanded = 1
@@ -2734,13 +2739,12 @@ export namespace DebugAdapterInlineImplementation {
 export type DebugAdapterDescriptor = DebugAdapterExecutable | DebugAdapterServer | DebugAdapterNamedPipeServer | DebugAdapterInlineImplementation;
 
 export enum LogLevel {
+    Off = 0,
     Trace = 1,
     Debug = 2,
     Info = 3,
     Warning = 4,
-    Error = 5,
-    Critical = 6,
-    Off = 7
+    Error = 5
 }
 
 /**
@@ -3111,6 +3115,7 @@ export class TestRunRequest implements theia.TestRunRequest {
         public readonly include: theia.TestItem[] | undefined = undefined,
         public readonly exclude: theia.TestItem[] | undefined = undefined,
         public readonly profile: theia.TestRunProfile | undefined = undefined,
+        public readonly continuous: boolean | undefined = undefined,
     ) { }
 }
 
@@ -3408,6 +3413,54 @@ export class WebviewEditorTabInput {
     constructor(readonly viewType: string) { }
 }
 
+export class TelemetryTrustedValue<T> {
+    readonly value: T;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+export class TelemetryLogger {
+    readonly onDidChangeEnableStates: theia.Event<TelemetryLogger>;
+    readonly isUsageEnabled: boolean;
+    readonly isErrorsEnabled: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    logUsage(eventName: string, data?: Record<string, any | TelemetryTrustedValue<any>>): void { }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    logError(eventNameOrError: string | Error, data?: Record<string, any | TelemetryTrustedValue<any>>): void { }
+    dispose(): void { }
+    constructor(readonly sender: TelemetrySender, readonly options?: TelemetryLoggerOptions) { }
+}
+
+export interface TelemetrySender {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sendEventData(eventName: string, data?: Record<string, any>): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sendErrorData(error: Error, data?: Record<string, any>): void;
+    flush?(): void | Thenable<void>;
+}
+
+export interface TelemetryLoggerOptions {
+    /**
+     * Whether or not you want to avoid having the built-in common properties such as os, extension name, etc injected into the data object.
+     * Defaults to `false` if not defined.
+     */
+    readonly ignoreBuiltInCommonProperties?: boolean;
+
+    /**
+     * Whether or not unhandled errors on the extension host caused by your extension should be logged to your sender.
+     * Defaults to `false` if not defined.
+     */
+    readonly ignoreUnhandledErrors?: boolean;
+
+    /**
+     * Any additional common properties which should be injected into the data object.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly additionalCommonProperties?: Record<string, any>;
+}
+
 export class NotebookEditorTabInput {
     constructor(readonly uri: URI, readonly notebookType: string) { }
 }
@@ -3423,4 +3476,15 @@ export class InteractiveWindowInput {
     constructor(readonly uri: URI, readonly inputBoxUri: URI) { }
 }
 
+// #endregion
+
+// #region DocumentPaste
+@es5ClassCompat
+export class DocumentPasteEdit {
+    constructor(insertText: string | SnippetString) {
+        this.insertText = insertText;
+    }
+    insertText: string | SnippetString;
+    additionalEdit?: WorkspaceEdit;
+}
 // #endregion

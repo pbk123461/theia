@@ -21,15 +21,14 @@ import { existsSync, readFileSync } from 'fs';
 
 export class FrontendGenerator extends AbstractGenerator {
 
-    async generate(options: GeneratorOptions = {}): Promise<void> {
-        const frontendModules = this.pck.targetFrontendModules;
-        await this.write(this.pck.frontend('index.html'), this.compileIndexHtml(frontendModules));
-        await this.write(this.pck.frontend('index.js'), this.compileIndexJs(frontendModules));
+    async generate(options?: GeneratorOptions): Promise<void> {
+        await this.write(this.pck.frontend('index.html'), this.compileIndexHtml(this.pck.targetFrontendModules));
+        await this.write(this.pck.frontend('index.js'), this.compileIndexJs(this.pck.targetFrontendModules));
         await this.write(this.pck.frontend('secondary-window.html'), this.compileSecondaryWindowHtml());
         await this.write(this.pck.frontend('secondary-index.js'), this.compileSecondaryIndexJs(this.pck.secondaryWindowModules));
         if (this.pck.isElectron()) {
-            const electronMainModules = this.pck.targetElectronMainModules;
-            await this.write(this.pck.frontend('electron-main.js'), this.compileElectronMain(electronMainModules));
+            await this.write(this.pck.frontend('electron-main.js'), this.compileElectronMain(this.pck.targetElectronMainModules));
+            await this.write(this.pck.frontend('preload.js'), this.compilePreloadJs());
         }
     }
 
@@ -89,8 +88,7 @@ self.MonacoEnvironment = {
     getWorkerUrl: function (moduleId, label) {
         return './editor.worker.js';
     }
-}
-`)}
+}`)}
 
 const preloader = require('@theia/core/lib/browser/preloader');
 
@@ -133,7 +131,6 @@ module.exports = preloader.preload().then(() => {
         return `// @ts-check
 
 require('reflect-metadata');
-require('@theia/electron/shared/@electron/remote/main').initialize();
 
 // Useful for Electron/NW.js apps as GUI apps on macOS doesn't inherit the \`$PATH\` define
 // in your dotfiles (.bashrc/.bash_profile/.zshrc/etc).
@@ -266,6 +263,17 @@ module.exports = Promise.resolve().then(() => {
     container.load(frontendApplicationModule);
     ${compiledModuleImports}
 });
+`;
+    }
+
+    compilePreloadJs(): string {
+        const lines = Array.from(this.pck.preloadModules)
+            .map(([moduleName, path]) => `require('${path}').preload();`);
+        const imports = '\n' + lines.join('\n');
+
+        return `\
+// @ts-check
+${imports}
 `;
     }
 }

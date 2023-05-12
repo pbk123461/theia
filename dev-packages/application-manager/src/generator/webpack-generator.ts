@@ -103,7 +103,7 @@ module.exports = [{
         devtoolModuleFilenameTemplate: 'webpack:///[resource-path]?[loaders]',
         globalObject: 'self'
     },
-    target: '${this.ifBrowser('web', 'electron-renderer')}',
+    target: 'web',
     cache: staticCompression,
     module: {
         rules: [
@@ -252,7 +252,7 @@ module.exports = [{
         devtoolModuleFilenameTemplate: 'webpack:///[resource-path]?[loaders]',
         globalObject: 'self'
     },
-    target: 'electron-renderer',
+    target: 'web',
     cache: staticCompression,
     module: {
         rules: [
@@ -278,7 +278,25 @@ module.exports = [{
         warnings: true,
         children: true
     }
-}];`;
+}${this.ifElectron(`, {
+    mode,
+    devtool: 'source-map',
+    entry: {
+        "preload": path.resolve(__dirname, 'src-gen/frontend/preload.js'),
+    },
+    output: {
+        filename: '[name].js',
+        path: outputPath,
+        devtoolModuleFilenameTemplate: 'webpack:///[resource-path]?[loaders]',
+        globalObject: 'self'
+    },
+    target: 'electron-preload',
+    cache: staticCompression,
+    stats: {
+        warnings: true,
+        children: true
+    }
+}`)}];`;
     }
 
     protected compileUserWebpackConfig(): string {

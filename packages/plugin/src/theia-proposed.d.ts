@@ -168,35 +168,6 @@ export module '@theia/plugin' {
         color?: ThemeColor;
     }
 
-    // #region LogLevel: https://github.com/microsoft/vscode/issues/85992
-
-    /**
-     * The severity level of a log message
-     */
-    export enum LogLevel {
-        Trace = 1,
-        Debug = 2,
-        Info = 3,
-        Warning = 4,
-        Error = 5,
-        Critical = 6,
-        Off = 7
-    }
-
-    export namespace env {
-        /**
-         * Current logging level.
-         */
-        export const logLevel: LogLevel;
-
-        /**
-         * An [event](#Event) that fires when the log level has changed.
-         */
-        export const onDidChangeLogLevel: Event<LogLevel>;
-    }
-
-    // #endregion
-
     // #region search in workspace
     /**
      * The parameters of a query for text search.
@@ -640,6 +611,98 @@ export module '@theia/plugin' {
          */
         export const allAcrossExtensionHosts: readonly Extension<void>[];
 
+    }
+
+    // #region DocumentPaste
+
+    // https://github.com/microsoft/vscode/issues/30066/
+
+    /**
+     * Provider invoked when the user copies and pastes code.
+     */
+    export interface DocumentPasteEditProvider {
+
+        /**
+         * Optional method invoked after the user copies text in a file.
+         *
+         * During {@link prepareDocumentPaste}, an extension can compute metadata that is attached to
+         * a {@link DataTransfer} and is passed back to the provider in {@link provideDocumentPasteEdits}.
+         *
+         * @param document Document where the copy took place.
+         * @param ranges Ranges being copied in the `document`.
+         * @param dataTransfer The data transfer associated with the copy. You can store additional values on this for later use in  {@link provideDocumentPasteEdits}.
+         * @param token A cancellation token.
+         */
+        prepareDocumentPaste?(document: TextDocument, ranges: readonly Range[], dataTransfer: DataTransfer, token: CancellationToken): void | Thenable<void>;
+
+        /**
+         * Invoked before the user pastes into a document.
+         *
+         * In this method, extensions can return a workspace edit that replaces the standard pasting behavior.
+         *
+         * @param document Document being pasted into
+         * @param ranges Currently selected ranges in the document.
+         * @param dataTransfer The data transfer associated with the paste.
+         * @param token A cancellation token.
+         *
+         * @return Optional workspace edit that applies the paste. Return undefined to use standard pasting.
+         */
+        provideDocumentPasteEdits(document: TextDocument, ranges: readonly Range[], dataTransfer: DataTransfer, token: CancellationToken): ProviderResult<DocumentPasteEdit>;
+    }
+
+    /**
+     * An operation applied on paste
+     */
+    class DocumentPasteEdit {
+        /**
+         * The text or snippet to insert at the pasted locations.
+         */
+        insertText: string | SnippetString;
+
+        /**
+         * An optional additional edit to apply on paste.
+         */
+        additionalEdit?: WorkspaceEdit;
+
+        /**
+         * @param insertText The text or snippet to insert at the pasted locations.
+         */
+        constructor(insertText: string | SnippetString);
+    }
+
+    interface DocumentPasteProviderMetadata {
+        /**
+         * Mime types that `provideDocumentPasteEdits` should be invoked for.
+         *
+         * Use the special `files` mimetype to indicate the provider should be invoked if any files are present in the `DataTransfer`.
+         */
+        readonly pasteMimeTypes: readonly string[];
+    }
+
+    namespace languages {
+        export function registerDocumentPasteEditProvider(selector: DocumentSelector, provider: DocumentPasteEditProvider, metadata: DocumentPasteProviderMetadata): Disposable;
+    }
+    // #endregion
+
+    // #region SessionIdentityProvider
+    export namespace workspace {
+        /**
+         *
+         * @param scheme The URI scheme that this provider can provide edit session identities for.
+         * @param provider A provider which can convert URIs for workspace folders of scheme @param scheme to
+         * an edit session identifier which is stable across machines. This enables edit sessions to be resolved.
+         */
+        export function registerEditSessionIdentityProvider(scheme: string, provider: EditSessionIdentityProvider): Disposable;
+    }
+
+    export interface EditSessionIdentityProvider {
+        /**
+         *
+         * @param workspaceFolder The workspace folder to provide an edit session identity for.
+         * @param token A cancellation token for the request.
+         * @returns An string representing the edit session identity for the requested workspace folder.
+         */
+        provideEditSessionIdentity(workspaceFolder: WorkspaceFolder, token: CancellationToken): ProviderResult<string>;
     }
 
     // #endregion
